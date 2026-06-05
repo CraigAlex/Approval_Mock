@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Requisition Request – Approval Dashboard (Mockup)</title>
+  <style>
+    :root{
+      --bg:#f5f6f8; --panel:#ffffff; --muted:#667085; --text:#101828;
+      --border:#e5e7eb; --accent:#0f6cbd; --accent2:#107c10;
+      --danger:#b42318; --warn:#b54708;
+      --shadow:0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.1);
+      --radius:10px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:var(--font); background:var(--bg); color:var(--text)}
+
+    .topbar{background:var(--panel); box-shadow:var(--shadow); position:sticky; top:0; z-index:50;}
+    .topbar-inner{max-width:1200px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; gap:16px}
+    .brand{font-weight:700; letter-spacing:.2px}
+    .tabs{display:flex; gap:14px; color:var(--muted); font-size:14px}
+    .tabs a{color:inherit; text-decoration:none; padding:6px 8px; border-radius:8px}
+    .tabs a.active{color:var(--text); background:#eef5ff}
+    .spacer{flex:1}
+    .searchbox{display:flex; align-items:center; gap:8px; background:#f2f4f7; border:1px solid var(--border); border-radius:999px; padding:8px 12px; min-width:320px}
+    .searchbox input{border:none; outline:none; background:transparent; width:100%; font-size:14px}
+
+    .page{max-width:1200px; margin:18px auto 40px; padding:0 16px}
+    .title{font-size:22px; font-weight:700; margin:0 0 6px}
+    .subtitle{color:var(--muted); margin:0 0 16px; font-size:14px}
+
+    .summary{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px}
+    .pill{background:var(--panel); border:1px solid var(--border); border-radius:999px; padding:8px 12px; font-size:13px; box-shadow:var(--shadow)}
+    .pill strong{font-weight:700}
+
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:12px 0}
+    .btn{border:1px solid var(--border); background:var(--panel); padding:8px 10px; border-radius:10px; cursor:pointer; font-size:13px; display:inline-flex; align-items:center; gap:8px; box-shadow:var(--shadow)}
+    .btn.primary{border-color:#cfe4ff; background:#eef5ff; color:#0b4a8a}
+    .btn.success{border-color:#d1fadf; background:#ecfdf3; color:#067647}
+    .btn.danger{border-color:#fee4e2; background:#fffbfa; color:var(--danger)}
+    .btn.warn{border-color:#ffead5; background:#fffcf5; color:var(--warn)}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+
+    .toolbar .right{margin-left:auto; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .mini-search{display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:8px 10px; box-shadow:var(--shadow)}
+    .mini-search input{border:none; outline:none; font-size:13px; min-width:260px}
+
+    .grid-wrap{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow)}
+    .grid-head{padding:10px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; color:var(--muted); font-size:13px}
+    .groupbar{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .groupchip{background:#f2f4f7; border:1px dashed #d0d5dd; border-radius:999px; padding:4px 10px; color:#344054}
+
+    table{width:100%; border-collapse:separate; border-spacing:0}
+    thead th{position:sticky; top:0; z-index:5; background:#fafafa; border-bottom:1px solid var(--border); font-size:12px; color:#344054; padding:10px 10px; white-space:nowrap}
+    tbody td{border-bottom:1px solid var(--border); padding:10px 10px; font-size:13px; vertical-align:top}
+    tbody tr:hover td{background:#fcfcfd}
+    .muted{color:var(--muted)}
+
+    /* ✅ Fixed: correct sticky offsets so Action does NOT overlap Request ID */
+    /* Default widths: Select=44px, Action=110px, Request ID=120px */
+    .sticky1{position:sticky; left:0; z-index:6; background:inherit}
+    .sticky2{position:sticky; left:44px; z-index:6; background:inherit}
+    .sticky3{position:sticky; left:154px; z-index:6; background:inherit}
+
+    .badge{display:inline-flex; align-items:center; font-size:11px; font-weight:600; padding:2px 8px; border-radius:999px; border:1px solid transparent}
+    .badge.repl{background:#f2f4f7; color:#344054; border-color:#e4e7ec}
+    .badge.new{background:#eef5ff; color:#0b4a8a; border-color:#cfe4ff}
+
+    .action-menu{display:flex; gap:6px; align-items:center}
+    .action-link{color:var(--accent); text-decoration:none; font-weight:600; cursor:pointer}
+
+    .chev{cursor:pointer; user-select:none; font-size:14px}
+    .details{display:none; background:#f9fafb}
+    .details td{padding:12px 10px; color:#344054}
+    .details-grid{display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:10px}
+    .k{color:#667085; font-size:12px}
+    .v{font-size:13px}
+
+    input[type="checkbox"]{width:16px; height:16px}
+
+    .overlay{position:fixed; inset:0; background:rgba(16,24,40,.45); display:none; align-items:center; justify-content:center; z-index:60}
+    .modal{width:min(820px, 94vw); background:var(--panel); border-radius:14px; box-shadow:0 20px 40px rgba(16,24,40,.2); border:1px solid var(--border); overflow:hidden}
+    .modal header{padding:14px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border)}
+    .modal header h2{margin:0; font-size:16px}
+    .modal .content{display:grid; grid-template-columns: 1.2fr .8fr; gap:0}
+    .modal .left, .modal .rightpane{padding:14px 16px}
+    .modal .rightpane{border-left:1px solid var(--border); background:#fafafa}
+    .modal footer{padding:12px 16px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px}
+
+    .col-list{border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff}
+    .col-item{display:flex; align-items:center; gap:10px; padding:10px 10px; border-bottom:1px solid var(--border)}
+    .col-item:last-child{border-bottom:none}
+    .drag{cursor:grab; color:#98a2b3; font-size:16px}
+    .col-name{font-size:13px}
+    .hint{font-size:12px; color:var(--muted); margin-top:10px; line-height:1.35}
+
+    .view-chip{display:inline-flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--border); border-radius:999px; padding:6px 10px; font-size:12px; margin:4px 6px 0 0}
+
+    @media (max-width: 860px){
+      .searchbox{min-width:unset; flex:1}
+      .mini-search input{min-width:unset; width:200px}
+      .modal .content{grid-template-columns:1fr}
+      .modal .rightpane{border-left:none; border-top:1px solid var(--border)}
+      .details-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">fiserv.</div>
+      <nav class="tabs" aria-label="Primary">
+        <a href="#" aria-current="page" class="active">Requisitions</a>
+        <a href="#">Reports</a>
+        <a href="#">Resources</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="searchbox" role="search">
+        <span class="muted">🔎</span>
+        <input id="globalSearch" placeholder="Search requisitions..." />
+      </div>
+      <div class="muted" style="font-size:13px">Matt Figurski ▾</div>
+    </div>
+  </div>
+
+  <main class="page">
+    <h1 class="title">Approval Dashboard – Matt Figurski</h1>
+    <p class="subtitle"><strong id="countPill">5 requisitions</strong> pending approval</p>
+
+    <div class="summary">
+      <div class="pill">Total Salary Range (Visible): <strong id="salaryRollup">$1,200,000 – $1,630,000</strong></div>
+      <div class="pill">Selected: <strong id="selectedCount">0</strong></div>
+      <div class="pill">Group: <strong id="groupLabel">None</strong></div>
+    </div>
+
+    <div class="toolbar" aria-label="Actions">
+      <button class="btn" id="btnClear" disabled>Clear Selection</button>
+      <button class="btn success" id="btnApprove" disabled>✓ Approve</button>
+      <button class="btn danger" id="btnReject" disabled>✕ Reject</button>
+      <button class="btn warn" id="btnSendBack" disabled>↩ Send Back</button>
+
+      <div class="right">
+        <button class="btn" id="btnGroup">Group By</button>
+        <button class="btn" id="btnColumns">Columns</button>
+        <button class="btn" id="btnExport">Export</button>
+        <div class="mini-search">
+          <span class="muted">🔎</span>
+          <input id="gridSearch" placeholder="Search within visible rows" />
+        </div>
+      </div>
+    </div>
+
+    <section class="grid-wrap" aria-label="Requisition approvals">
+      <div class="grid-head">
+        <div class="groupbar" id="groupBar">
+          <span class="muted">Tip:</span>
+          <span class="muted">Use</span> <span class="groupchip">Group By</span> <span class="muted">to group on any column. Use</span> <span class="groupchip">Columns</span> <span class="muted">to show/hide & reorder.</span>
+        </div>
+      </div>
+
+      <div style="overflow:auto; max-height:62vh;">
+        <table id="grid" role="grid" aria-rowcount="5">
+          <colgroup id="colgroup"></colgroup>
+          <thead><tr id="thead"></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:10px 12px; color:var(--muted); font-size:12px">
+        <div id="footerLeft">Showing 1–5 of 5</div>
+        <div>Scroll vertically for more rows • Sticky columns stay visible</div>
+      </div>
+    </section>
+  </main>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="colsTitle">
+    <div class="modal">
+      <header>
+        <h2 id="colsTitle">Choose & Reorder Columns</h2>
+        <div class="spacer"></div>
+        <button class="btn" id="btnCloseCols">Close</button>
+      </header>
+      <div class="content">
+        <div class="left">
+          <div class="col-list" id="colList" aria-label="Column list"></div>
+          <div class="hint">
+            <strong>How this works:</strong> Check to show/hide. Drag the handle to reorder. Preferences are stored in <em>localStorage</em> for this mockup.
+          </div>
+        </div>
+        <div class="rightpane">
+          <div style="font-weight:700; font-size:13px; margin-bottom:8px;">Saved Views (Mock)</div>
+          <div id="views">
+            <span class="view-chip">My Pending</span>
+            <span class="view-chip">High Impact</span>
+            <span class="view-chip">NYC Roles</span>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <button class="btn" id="btnResetCols">Reset to Default</button>
+        <button class="btn primary" id="btnSaveCols">Save</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlayGroup" role="dialog" aria-modal="true" aria-labelledby="groupTitle">
+    <div class="modal" style="width:min(560px, 94vw)">
+      <header>
+        <h2 id="groupTitle">Group By</h2>
+        <div class="spacer"></div>
+        <button class="btn" id="btnCloseGroup">Close</button>
+      </header>
+      <div class="left" style="padding:14px 16px">
+        <div class="hint" style="margin:0 0 8px">Choose a column to group rows. (Mock: one level of grouping.)</div>
+        <select id="groupSelect" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border)"></select>
+        <div class="hint">Select “None” to remove grouping.</div>
+      </div>
+      <footer>
+        <button class="btn primary" id="btnApplyGroup">Apply</button>
+      </footer>
+    </div>
+  </div>
+
+<script>
+  const rows = [
+    { id:"Q-104281", reason:"Replacement", title:"Workday Advisor", hiringManager:"Mike Bradley", mc:"Takis Georgakopoulos", mc1:"Matt Figurski", location:"Berkeley Heights", grade:"14", positions:1, replaced:"(Confidential)", impact:"Maintains payroll processing continuity and reduces HR operational risk.", funding:"Backfill – operating budget", requestDate:"2026-03-10", salaryMin:1200000, salaryMax:1630000 },
+    { id:"Q-104280", reason:"Replacement", title:"SAP FICO Specialist", hiringManager:"Christine Chu", mc:"Takis Georgakopoulos", mc1:"Matt Figurski", location:"Marietta", grade:"12", positions:1, replaced:"(Confidential)", impact:"Supports finance close + controls; mitigates SOX-related timing risk.", funding:"Backfill – operating budget", requestDate:"2026-03-09", salaryMin:950000, salaryMax:1150000 },
+    { id:"Q-104279", reason:"New Headcount", title:"Full Stack Developer", hiringManager:"Venkat Jaddu", mc:"Takis Georgakopoulos", mc1:"Matt Figurski", location:"NYC", grade:"11", positions:2, replaced:"—", impact:"Accelerates automation roadmap; improves time-to-deliver for HRIT enhancements.", funding:"Incremental – approved program", requestDate:"2026-03-08", salaryMin:700000, salaryMax:900000 },
+    { id:"Q-104278", reason:"New Headcount", title:"Full Stack Developer", hiringManager:"Andrew Haffke", mc:"Takis Georgakopoulos", mc1:"Matt Figurski", location:"Marietta", grade:"11", positions:1, replaced:"—", impact:"Improves platform reliability and reduces incident volume for critical services.", funding:"Incremental – cost center reallocation", requestDate:"2026-03-08", salaryMin:650000, salaryMax:780000 },
+    { id:"Q-104277", reason:"Replacement", title:"Workday Advisor", hiringManager:"Mike Bradley", mc:"Takis Georgakopoulos", mc1:"Matt Figurski", location:"Berkeley Heights", grade:"14", positions:1, replaced:"(Confidential)", impact:"Ensures continuity in Workday operations; prevents backlog in HR transactions.", funding:"Backfill – operating budget", requestDate:"2026-03-07", salaryMin:1200000, salaryMax:1630000 }
+  ];
+
+  const allColumns = [
+    { key:"select", label:"", width:44, render:(r)=>`<input type='checkbox' class='rowcheck' data-id='${r.id}' aria-label='Select ${r.id}' />` },
+    { key:"action", label:"Action", width:110, sortable:false, render:(r)=>`<div class='action-menu'><a class='action-link' data-action='approve' data-id='${r.id}'>Approve</a><span class='muted'>▾</span></div>` },
+    { key:"id", label:"Request ID", width:120 },
+    { key:"reason", label:"Reason", width:120, render:(r)=> r.reason==="Replacement" ? `<span class='badge repl'>Replacement</span>` : `<span class='badge new'>New Headcount</span>` },
+    { key:"title", label:"Job Posting Title", width:220 },
+    { key:"hiringManager", label:"Hiring Manager", width:160 },
+    { key:"mc", label:"MC", width:190 },
+    { key:"mc1", label:"MC-1", width:140 },
+    { key:"location", label:"Work Location", width:150 },
+    { key:"grade", label:"Salary Grade", width:110 },
+    { key:"positions", label:"# Positions", width:110 },
+    { key:"replaced", label:"Person Being Replaced", width:190 },
+    { key:"impact", label:"Business Impact", width:220 },
+    { key:"funding", label:"How Funded", width:190 },
+    { key:"requestDate", label:"Request Date", width:130, render:(r)=> new Date(r.requestDate+"T00:00:00").toLocaleDateString() },
+    { key:"expand", label:"", width:44, sortable:false, render:(r)=>`<span class='chev' role='button' aria-label='Expand ${r.id}' data-expand='${r.id}'>▾</span>` }
+  ];
+
+  const defaultVisible = ["select","action","id","reason","title","hiringManager","mc","mc1","location","grade","expand"];
+  const STORAGE_KEY = "rr_cols_v1";
+
+  let state = { visibleKeys: loadCols() ?? defaultVisible.slice(), sortKey:null, sortDir:"asc", search:"", groupBy:null, selected:new Set() };
+
+  function loadCols(){ try{ const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return null; const parsed=JSON.parse(raw); return Array.isArray(parsed)&&parsed.length?parsed:null; }catch{return null;} }
+  function saveCols(keys){ localStorage.setItem(STORAGE_KEY, JSON.stringify(keys)); }
+  function colByKey(k){ return allColumns.find(c=>c.key===k); }
+  function fmtCurrency(n){ return n.toLocaleString(undefined,{style:"currency",currency:"USD",maximumFractionDigits:0}); }
+  function escapeHtml(s){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+  function groupBy(arr, key){ return arr.reduce((acc,r)=>{ const v=String(r[key]??"(blank)"); (acc[v] ||= []).push(r); return acc; }, {}); }
+
+  function pinnedClassFor(idx){
+    // Sticky first 3 visible columns to preserve context
+    if(idx===0) return "sticky1";
+    if(idx===1) return "sticky2";
+    if(idx===2) return "sticky3";
+    return "";
+  }
+
+  function render(){
+    const visibleCols = state.visibleKeys.map(colByKey).filter(Boolean);
+
+    document.getElementById("colgroup").innerHTML = visibleCols.map(c=>`<col style='width:${c.width||140}px' />`).join("");
+
+    const thead = document.getElementById("thead");
+    thead.innerHTML = visibleCols.map((c, idx)=>{
+      const sortable = c.sortable===false ? "" : `data-sort='${c.key}'`;
+      const sortIcon = state.sortKey===c.key ? (state.sortDir==="asc"?" ▲":" ▼") : "";
+      const sticky = pinnedClassFor(idx);
+      return `<th class='${sticky}' ${sortable} title='${c.label}'>${escapeHtml(c.label)}${sortIcon}</th>`;
+    }).join("");
+
+    const q = (state.search||"").trim().toLowerCase();
+    let data = rows.slice();
+    if(q) data = data.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));
+
+    if(state.sortKey){
+      const k=state.sortKey;
+      data.sort((a,b)=>{
+        const av=a[k]??""; const bv=b[k]??"";
+        const cmp = (typeof av==="number" && typeof bv==="number") ? (av-bv) : String(av).localeCompare(String(bv));
+        return state.sortDir==="asc"?cmp:-cmp;
+      });
+    }
+
+    const tbody=document.getElementById("tbody");
+    tbody.innerHTML="";
+
+    const groups = state.groupBy ? groupBy(data, state.groupBy) : {"":data};
+    Object.keys(groups).forEach(gk=>{
+      if(state.groupBy){
+        const tr=document.createElement("tr");
+        tr.innerHTML = `<td colspan='${visibleCols.length}' style='background:#f2f4f7; font-weight:700; color:#344054'>${escapeHtml(colByKey(state.groupBy).label)}: ${escapeHtml(gk)} <span class='muted' style='font-weight:500'>(${groups[gk].length})</span></td>`;
+        tbody.appendChild(tr);
+      }
+
+      groups[gk].forEach(r=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML = visibleCols.map((c, idx)=>{
+          const sticky = pinnedClassFor(idx);
+          const val = c.render ? c.render(r) : escapeHtml(String(r[c.key]??""));
+          return `<td class='${sticky}'>${val}</td>`;
+        }).join("");
+        tbody.appendChild(tr);
+
+        const details=document.createElement("tr");
+        details.className="details";
+        details.setAttribute("data-details", r.id);
+        details.innerHTML = `<td colspan='${visibleCols.length}'>
+          <div class='details-grid'>
+            <div><div class='k'>Business Impact</div><div class='v'>${escapeHtml(r.impact)}</div></div>
+            <div><div class='k'>How position will be funded</div><div class='v'>${escapeHtml(r.funding)}</div></div>
+            <div><div class='k'>Number of positions</div><div class='v'>${escapeHtml(String(r.positions))}</div></div>
+            <div><div class='k'>Person being replaced</div><div class='v'>${escapeHtml(r.replaced)}</div></div>
+            <div><div class='k'>Request Date</div><div class='v'>${escapeHtml(new Date(r.requestDate+"T00:00:00").toLocaleDateString())}</div></div>
+          </div>
+        </td>`;
+        tbody.appendChild(details);
+      });
+    });
+
+    document.getElementById("footerLeft").textContent = `Showing 1–${data.length} of ${data.length} (Total: ${rows.length})`;
+    document.getElementById("countPill").textContent = `${data.length} requisitions`;
+
+    if(data.length){
+      const min=Math.min(...data.map(r=>r.salaryMin));
+      const max=Math.max(...data.map(r=>r.salaryMax));
+      document.getElementById("salaryRollup").textContent = `${fmtCurrency(min)} – ${fmtCurrency(max)}`;
+    } else document.getElementById("salaryRollup").textContent = "—";
+
+    syncSelectionUI();
+  }
+
+  function syncSelectionUI(){
+    document.getElementById("selectedCount").textContent = String(state.selected.size);
+    const any=state.selected.size>0;
+    ["btnClear","btnApprove","btnReject","btnSendBack"].forEach(id=>document.getElementById(id).disabled=!any);
+    document.querySelectorAll(".rowcheck").forEach(cb=>{ const id=cb.getAttribute("data-id"); cb.checked = state.selected.has(id); });
+  }
+
+  function toggleExpand(id){
+    const details = document.querySelector(`tr[data-details='${CSS.escape(id)}']`);
+    if(!details) return;
+    details.style.display = (details.style.display !== "table-row") ? "table-row" : "none";
+  }
+
+  // Events
+  document.addEventListener("click", (e)=>{
+    const th=e.target.closest("th[data-sort]");
+    if(th){
+      const k=th.getAttribute("data-sort");
+      if(state.sortKey===k) state.sortDir = state.sortDir==="asc"?"desc":"asc";
+      else { state.sortKey=k; state.sortDir="asc"; }
+      render(); return;
+    }
+    const ex=e.target.closest("[data-expand]");
+    if(ex){ toggleExpand(ex.getAttribute("data-expand")); return; }
+    const approve=e.target.closest("[data-action='approve']");
+    if(approve){ alert(`Mock action: Approve ${approve.getAttribute("data-id")}`); return; }
+
+    if(e.target.id==="btnColumns") openCols();
+    if(e.target.id==="btnCloseCols") closeCols();
+    if(e.target.id==="btnSaveCols") { saveCols(state.visibleKeys); closeCols(); render(); }
+    if(e.target.id==="btnResetCols") { state.visibleKeys=defaultVisible.slice(); saveCols(state.visibleKeys); buildColList(); render(); }
+
+    if(e.target.id==="btnGroup") openGroup();
+    if(e.target.id==="btnCloseGroup") closeGroup();
+    if(e.target.id==="btnApplyGroup") applyGroup();
+
+    if(e.target.id==="btnClear") { state.selected.clear(); render(); }
+    if(e.target.id==="btnApprove") bulkAction("Approve");
+    if(e.target.id==="btnReject") bulkAction("Reject");
+    if(e.target.id==="btnSendBack") bulkAction("Send Back");
+
+    if(e.target.id==="btnExport") exportCsv();
+  });
+
+  document.addEventListener("change", (e)=>{
+    const cb=e.target.closest(".rowcheck");
+    if(cb){
+      const id=cb.getAttribute("data-id");
+      cb.checked ? state.selected.add(id) : state.selected.delete(id);
+      syncSelectionUI();
+    }
+  });
+
+  document.getElementById("gridSearch").addEventListener("input", (e)=>{ state.search=e.target.value; render(); });
+  document.getElementById("globalSearch").addEventListener("input", (e)=>{ state.search=e.target.value; document.getElementById("gridSearch").value=e.target.value; render(); });
+
+  function bulkAction(name){ alert(`Mock bulk action: ${name} for ${state.selected.size} requisition(s):\n- ${Array.from(state.selected).join("\n- ")}`); }
+
+  // Columns modal
+  function openCols(){ buildColList(); document.getElementById("overlay").style.display="flex"; }
+  function closeCols(){ document.getElementById("overlay").style.display="none"; }
+
+  function buildColList(){
+    const list=document.getElementById("colList");
+    list.innerHTML="";
+    const visibleSet=new Set(state.visibleKeys);
+    const ordered=state.visibleKeys.concat(allColumns.map(c=>c.key).filter(k=>!visibleSet.has(k)));
+    ordered.forEach(k=>{
+      const col=colByKey(k); if(!col) return;
+      const item=document.createElement("div");
+      item.className="col-item";
+      item.setAttribute("draggable","true");
+      item.dataset.key=k;
+      const checked=state.visibleKeys.includes(k);
+      const locked=(k==="action"||k==="id");
+      item.innerHTML=`<span class='drag' title='Drag to reorder'>⋮⋮</span>
+        <input type='checkbox' ${checked?"checked":""} ${locked?"disabled":""} />
+        <div class='col-name'>${escapeHtml(col.label||k)} ${locked?" <span class='muted'>(required)</span>":""}</div>
+        <div class='spacer'></div>`;
+
+      item.querySelector("input").addEventListener("change", (e)=>{
+        const on=e.target.checked;
+        if(on){ if(!state.visibleKeys.includes(k)) state.visibleKeys.push(k); }
+        else state.visibleKeys = state.visibleKeys.filter(x=>x!==k);
+      });
+
+      item.addEventListener("dragstart", (e)=>{ e.dataTransfer.setData("text/plain", k); e.dataTransfer.effectAllowed="move"; });
+      item.addEventListener("dragover", (e)=>e.preventDefault());
+      item.addEventListener("drop", (e)=>{
+        e.preventDefault();
+        const from=e.dataTransfer.getData("text/plain");
+        const to=k;
+        if(from===to) return;
+        const vk=state.visibleKeys.slice();
+        if(!vk.includes(from) || !vk.includes(to)) return;
+        const fromIdx=vk.indexOf(from); const toIdx=vk.indexOf(to);
+        vk.splice(fromIdx,1); vk.splice(toIdx,0,from);
+        state.visibleKeys=vk;
+        buildColList();
+      });
+      list.appendChild(item);
+    });
+  }
+
+  // Group modal
+  function openGroup(){
+    const sel=document.getElementById("groupSelect");
+    sel.innerHTML="";
+    const none=document.createElement("option"); none.value=""; none.textContent="None"; sel.appendChild(none);
+    allColumns.filter(c=>!["select","action","expand"].includes(c.key)).forEach(c=>{
+      const o=document.createElement("option"); o.value=c.key; o.textContent=c.label; sel.appendChild(o);
+    });
+    sel.value=state.groupBy||"";
+    document.getElementById("overlayGroup").style.display="flex";
+  }
+  function closeGroup(){ document.getElementById("overlayGroup").style.display="none"; }
+  function applyGroup(){
+    const val=document.getElementById("groupSelect").value;
+    state.groupBy = val || null;
+    document.getElementById("groupLabel").textContent = state.groupBy ? colByKey(state.groupBy).label : "None";
+    closeGroup();
+    render();
+  }
+
+  function exportCsv(){
+    const cols=state.visibleKeys.filter(k=>k!=="expand" && k!=="select");
+    const header=cols.map(k=>`"${(colByKey(k)?.label||k).replaceAll('"','""')}"`).join(",");
+    const q=(state.search||"").trim().toLowerCase();
+    let data=rows.slice();
+    if(q) data=data.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));
+    const lines=[header].concat(data.map(r=>cols.map(k=>`"${String(r[k]??"").replaceAll('"','""')}"`).join(",")));
+    const blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download="requisition-approval-dashboard-mock.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById("groupLabel").textContent="None";
+  render();
+</script>
+</body>
+</html>
